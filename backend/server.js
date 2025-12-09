@@ -59,6 +59,11 @@ mongoose.connect(config.MONGODB_URI, {
 app.use('/api/users', userRoutes);
 app.use('/api/moods', moodRoutes);
 
+// Health Check Route
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
