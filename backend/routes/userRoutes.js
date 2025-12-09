@@ -22,17 +22,17 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
+    fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: function (req, file, cb) {
-    const filetypes = /jpeg|jpg|png|gif/;
+    const filetypes = /jpeg|jpg|png|gif|pdf/;
     const mimetype = filetypes.test(file.mimetype);
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
 
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb(new Error('Only image files are allowed!'));
+    cb(new Error('Only image and PDF files are allowed!'));
   }
 });
 
@@ -167,6 +167,53 @@ router.post('/upload-profile-image', auth, upload.single('profileImage'), async 
   } catch (error) {
     console.error('Profile image upload error:', error);
     res.status(500).json({ message: 'Error uploading profile image' });
+  }
+});
+
+// Upload Prescription
+router.post('/upload-prescription', auth, upload.single('prescription'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    const user = await User.findById(req.user.userId);
+    const fileUrl = `http://localhost:5002/uploads/profile-images/${req.file.filename}`;
+    
+    const newPrescription = {
+      name: req.file.originalname,
+      fileUrl: fileUrl
+    };
+
+    user.prescriptions.push(newPrescription);
+    await user.save();
+
+    res.json(newPrescription);
+  } catch (error) {
+    console.error('Prescription upload error:', error);
+    res.status(500).json({ message: 'Error uploading prescription' });
+  }
+});
+
+// Delete Prescription
+router.delete('/prescription/:prescriptionId', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId);
+    
+    // Find prescription to get filename
+    const prescription = user.prescriptions.id(req.params.prescriptionId);
+    if (!prescription) {
+      return res.status(404).json({ message: 'Prescription not found' });
+    }
+
+    // Remove from array
+    user.prescriptions.pull(req.params.prescriptionId);
+    await user.save();
+
+    res.json({ message: 'Prescription deleted successfully' });
+  } catch (error) {
+    console.error('Prescription delete error:', error);
+    res.status(500).json({ message: 'Error deleting prescription' });
   }
 });
 

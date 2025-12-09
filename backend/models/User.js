@@ -36,6 +36,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  prescriptions: [{
+    name: {
+      type: String,
+      required: true
+    },
+    fileUrl: {
+      type: String,
+      required: true
+    },
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdAt: {
     type: Date,
     default: Date.now

@@ -14,6 +14,7 @@ import About from './pages/About';
 import Consult from './pages/Consult';
 import ProtectedRoute from './components/ProtectedRoute';
 import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Layout from './components/layout/Layout';
 import { CartProvider } from './context/CartContext';
 import { AppointmentProvider } from './context/AppointmentContext';
@@ -65,6 +66,7 @@ function App() {
                     </ProtectedRoute>
                   } 
                 />
+                <Route path="/settings" element={<Settings />} />
               </Route>
             </Routes>
             <Cart />

@@ -12,7 +12,7 @@ const Profile = () => {
   const [prescriptions, setPrescriptions] = useState([]);
   const fileInputRef = useRef(null);
   const prescriptionInputRef = useRef(null);
-  const { appointments, cancelAppointment } = useAppointments();
+  const { appointments, cancelAppointment, deleteAppointment } = useAppointments();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -143,6 +143,30 @@ const Profile = () => {
     } catch (error) {
       toast.error(error.message || 'Error uploading prescription');
       console.error('Prescription upload error:', error);
+    }
+  };
+
+  const handleDeletePrescription = async (prescriptionId) => {
+    if (!window.confirm('Are you sure you want to delete this prescription?')) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_ENDPOINTS.deletePrescription}/${prescriptionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete prescription');
+      }
+
+      setPrescriptions(prev => prev.filter(p => p._id !== prescriptionId));
+      toast.success('Prescription deleted successfully');
+    } catch (error) {
+      toast.error('Error deleting prescription');
+      console.error('Delete error:', error);
     }
   };
 
@@ -399,17 +423,17 @@ const Profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-green-50 p-6 rounded-xl">
                   <div className="text-green-600 text-lg font-semibold mb-2">Appointments</div>
-                  <div className="text-3xl font-bold text-gray-900">12</div>
+                  <div className="text-3xl font-bold text-gray-900">{appointments.length}</div>
                   <div className="text-sm text-gray-600 mt-1">Total consultations</div>
                 </div>
                 <div className="bg-green-50 p-6 rounded-xl">
                   <div className="text-green-600 text-lg font-semibold mb-2">Health Records</div>
-                  <div className="text-3xl font-bold text-gray-900">8</div>
+                  <div className="text-3xl font-bold text-gray-900">{prescriptions.length}</div>
                   <div className="text-sm text-gray-600 mt-1">Uploaded documents</div>
                 </div>
                 <div className="bg-green-50 p-6 rounded-xl">
                   <div className="text-green-600 text-lg font-semibold mb-2">Prescriptions</div>
-                  <div className="text-3xl font-bold text-gray-900">5</div>
+                  <div className="text-3xl font-bold text-gray-900">{prescriptions.length}</div>
                   <div className="text-sm text-gray-600 mt-1">Active medications</div>
                 </div>
               </div>
@@ -452,16 +476,29 @@ const Profile = () => {
                           <p className="text-xs text-gray-500">{new Date(prescription.uploadedAt).toLocaleDateString()}</p>
                         </div>
                       </div>
-                      <a
-                        href={prescription.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-600 hover:text-green-700"
-                      >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </a>
+                      <div className="flex space-x-2">
+                        <a
+                          href={prescription.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-700"
+                          title="View"
+                        >
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </a>
+                        <button
+                          onClick={() => handleDeletePrescription(prescription._id)}
+                          className="text-red-500 hover:text-red-700"
+                          title="Delete"
+                        >
+                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -511,6 +548,20 @@ const Profile = () => {
                               Cancel Appointment
                             </button>
                           )}
+                          <button
+                            onClick={() => {
+                              if(window.confirm('Delete this appointment record?')) {
+                                deleteAppointment(appointment.id);
+                                toast.success('Appointment deleted');
+                              }
+                            }}
+                            className="mt-1 text-gray-400 hover:text-red-500 text-xs flex items-center"
+                          >
+                            <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Delete Record
+                          </button>
                         </div>
                       </div>
                     </div>

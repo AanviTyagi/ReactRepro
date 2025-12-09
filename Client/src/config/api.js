@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5002/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5002/api';
 
 export const API_ENDPOINTS = {
   register: `${API_BASE_URL}/users/register`,
@@ -6,6 +6,8 @@ export const API_ENDPOINTS = {
   profile: `${API_BASE_URL}/users/profile`,
   moods: `${API_BASE_URL}/moods`,
   uploadProfileImage: `${API_BASE_URL}/users/upload-profile-image`,
+  uploadPrescription: `${API_BASE_URL}/users/upload-prescription`,
+  deletePrescription: `${API_BASE_URL}/users/prescription`,
   updateProfile: `${API_BASE_URL}/users/profile`,
 };
 

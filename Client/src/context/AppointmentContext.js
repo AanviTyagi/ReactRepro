@@ -48,11 +48,16 @@ export const AppointmentProvider = ({ children }) => {
     );
   };
 
+  const deleteAppointment = (appointmentId) => {
+    setAppointments(prev => prev.filter(app => app.id !== appointmentId));
+  };
+
   const value = {
     appointments,
     addAppointment,
     updateAppointmentStatus,
     cancelAppointment,
+    deleteAppointment,
   };
 
   return (

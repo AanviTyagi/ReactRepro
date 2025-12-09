@@ -85,9 +85,34 @@ function Consult() {
     );
   };
 
+  // Update mock data to include gender for filtering
+  const doctorsWithGender = doctors.map(doc => ({
+    ...doc,
+    gender: ['Dr. Priya Mehta', 'Dr. Anjali Sharma'].includes(doc.name) ? 'Female' : 'Male'
+  }));
+
+  const [filteredDoctors, setFilteredDoctors] = useState(doctorsWithGender);
+
   const handleSearch = (e) => {
     e.preventDefault();
-    // Implement search functionality
+    
+    let result = doctorsWithGender;
+
+    if (specialization && specialization !== 'All Specializations') {
+      result = result.filter(doc => doc.specialization === specialization);
+    }
+
+    if (gender && gender !== 'All') {
+      result = result.filter(doc => doc.gender === gender);
+    }
+
+    if (location) {
+      result = result.filter(doc => 
+        doc.address.toLowerCase().includes(location.toLowerCase())
+      );
+    }
+
+    setFilteredDoctors(result);
   };
 
   return (
@@ -135,8 +160,12 @@ function Consult() {
 
         {/* Doctors Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {doctors.map((doctor) => (
-            <div key={doctor.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+          {filteredDoctors.map((doctor, index) => (
+            <div 
+              key={doctor.id} 
+              className="bg-white rounded-lg shadow-md overflow-hidden animate-fade-in-up hover-lift"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
